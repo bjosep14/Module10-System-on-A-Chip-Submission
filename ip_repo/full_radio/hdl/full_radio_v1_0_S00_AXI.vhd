@@ -118,6 +118,34 @@ architecture arch_imp of full_radio_v1_0_S00_AXI is
 	signal reg_data_out	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	signal byte_index	: integer;
 	signal aw_en	: std_logic;
+	
+	
+	--User signals
+	signal aresetn : std_logic;
+	
+	signal m_axis_fake_adc_tdata : std_logic_vector(31 downto 0);
+	signal m_axis_fake_adc_tvalid : std_logic;
+	
+	signal m_axis_dds_tuner_tdata : std_logic_vector(31 downto 0);
+	signal m_axis_dds_tuner_tvalid : std_logic;
+	
+	signal m_axis_cmpy_tdata : std_logic_vector(31 downto 0);
+	signal m_axis_cmpy_tvalid : std_logic;
+	
+	signal m_axis_fir_stage1_tdata : std_logic_vector(79 downto 0);
+	signal m_axis_fir_stage1_tvalid : std_logic;
+	signal s_axis_fir_stage1_tready : std_logic;
+	
+	signal m_axis_fir_stage2_tdata : std_logic_vector(127 downto 0);
+	signal m_axis_fir_stage2_tvalid : std_logic;
+	signal s_axis_fir_stage2_tready : std_logic; 
+	
+	signal s_data_raw_i : std_logic_vector(63 downto 0);
+	signal s_data_i : std_logic_vector(63 downto 0);
+	signal s_data_raw_q : std_logic_vector(63 downto 0);
+	signal s_data_q : std_logic_vector(63 downto 0);
+    
+	 
 
 COMPONENT dds_compiler_0
   PORT (
@@ -129,6 +157,53 @@ COMPONENT dds_compiler_0
     m_axis_data_tdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
   );
     END COMPONENT;
+
+COMPONENT dds_compiler_1
+  PORT (
+    aclk : IN STD_LOGIC;
+    aresetn : IN STD_LOGIC;
+    s_axis_phase_tvalid : IN STD_LOGIC;
+    s_axis_phase_tdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    m_axis_data_tvalid : OUT STD_LOGIC;
+    m_axis_data_tdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
+  );
+END COMPONENT;
+
+COMPONENT cmpy_0
+  PORT (
+    aclk : IN STD_LOGIC;
+    s_axis_a_tvalid : IN STD_LOGIC;
+    s_axis_a_tdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    s_axis_b_tvalid : IN STD_LOGIC;
+    s_axis_b_tdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    m_axis_dout_tvalid : OUT STD_LOGIC;
+    m_axis_dout_tdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0) 
+  );
+END COMPONENT;
+
+COMPONENT fir_compiler_0
+  PORT (
+    aresetn : IN STD_LOGIC;
+    aclk : IN STD_LOGIC;
+    s_axis_data_tvalid : IN STD_LOGIC;
+    s_axis_data_tready : OUT STD_LOGIC;
+    s_axis_data_tdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    m_axis_data_tvalid : OUT STD_LOGIC;
+    m_axis_data_tdata : OUT STD_LOGIC_VECTOR(79 DOWNTO 0) 
+  );
+END COMPONENT;
+
+COMPONENT fir_compiler_1
+  PORT (
+    aresetn : IN STD_LOGIC;
+    aclk : IN STD_LOGIC;
+    s_axis_data_tvalid : IN STD_LOGIC;
+    s_axis_data_tready : OUT STD_LOGIC;
+    s_axis_data_tdata : IN STD_LOGIC_VECTOR(79 DOWNTO 0);
+    m_axis_data_tvalid : OUT STD_LOGIC;
+    m_axis_data_tdata : OUT STD_LOGIC_VECTOR(127 DOWNTO 0) 
+  );
+END COMPONENT;
 
 begin
 	-- I/O Connections assignments
@@ -192,6 +267,8 @@ begin
 	-- axi_wready is asserted for one S_AXI_ACLK clock cycle when both
 	-- S_AXI_AWVALID and S_AXI_WVALID are asserted. axi_wready is 
 	-- de-asserted when reset is low. 
+	
+
 
 	process (S_AXI_ACLK)
 	begin
@@ -231,6 +308,7 @@ begin
 	      slv_reg2 <= (others => '0');
 	      slv_reg3 <= (others => '0');
 	    else
+	      slv_reg3 <= std_logic_vector(unsigned(slv_reg3) + 1); --increment slv_reg2 for every rising edge 
 	      loc_addr := axi_awaddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
 	      if (slv_reg_wren = '1') then
 	        case loc_addr is
@@ -256,14 +334,6 @@ begin
 	                -- Respective byte enables are asserted as per write strobes                   
 	                -- slave registor 2
 	                slv_reg2(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
-	              end if;
-	            end loop;
-	          when b"11" =>
-	            for byte_index in 0 to (C_S_AXI_DATA_WIDTH/8-1) loop
-	              if ( S_AXI_WSTRB(byte_index) = '1' ) then
-	                -- Respective byte enables are asserted as per write strobes                   
-	                -- slave registor 3
-	                slv_reg3(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
 	              end if;
 	            end loop;
 	          when others =>
@@ -367,7 +437,7 @@ begin
 	      when b"00" =>
 	        reg_data_out <= slv_reg0;
 	      when b"01" =>
-	        reg_data_out <= x"DEADBEEF";
+	        reg_data_out <= slv_reg1;
 	      when b"10" =>
 	        reg_data_out <= slv_reg2;
 	      when b"11" =>
@@ -395,19 +465,67 @@ begin
 	  end if;
 	end process;
 
-
+    aresetn <= not slv_reg2(0);  
 	-- Add user logic here
 
-your_instance_name : dds_compiler_0
+fake_adc : dds_compiler_0
   PORT MAP (
     aclk => s_axi_aclk,
-    aresetn => '1',
+    aresetn =>  aresetn,
     s_axis_phase_tvalid => '1',
     s_axis_phase_tdata => slv_reg0,
-    m_axis_data_tvalid => m_axis_tvalid,
-    m_axis_data_tdata => m_axis_tdata
+    m_axis_data_tvalid => m_axis_fake_adc_tvalid,
+    m_axis_data_tdata => m_axis_fake_adc_tdata
+  );
+  
+  dds_tuner : dds_compiler_1
+  PORT MAP (
+    aclk => s_axi_aclk,
+    aresetn => aresetn,
+    s_axis_phase_tvalid => '1',
+    s_axis_phase_tdata => slv_reg1,
+    m_axis_data_tvalid => m_axis_dds_tuner_tvalid,
+    m_axis_data_tdata => m_axis_dds_tuner_tdata
+  );
+  
+  complex_mult : cmpy_0
+  PORT MAP (
+    aclk => s_axi_aclk,
+    s_axis_a_tvalid => m_axis_fake_adc_tvalid,
+    s_axis_a_tdata => m_axis_fake_adc_tdata,
+    s_axis_b_tvalid => m_axis_dds_tuner_tvalid,
+    s_axis_b_tdata => m_axis_dds_tuner_tdata,
+    m_axis_dout_tvalid => m_axis_cmpy_tvalid,
+    m_axis_dout_tdata => m_axis_cmpy_tdata
   );
 
+fir_stage_1 : fir_compiler_0
+  PORT MAP (
+    aresetn => aresetn,
+    aclk => s_axi_aclk,
+    s_axis_data_tvalid => m_axis_cmpy_tvalid,
+    s_axis_data_tready => s_axis_fir_stage1_tready,
+    s_axis_data_tdata => m_axis_cmpy_tdata,
+    m_axis_data_tvalid => m_axis_fir_stage1_tvalid,
+    m_axis_data_tdata => m_axis_fir_stage1_tdata
+  );
+  
+  fir_stage_2 : fir_compiler_1
+  PORT MAP (
+    aresetn => aresetn,
+    aclk => s_axi_aclk,
+    s_axis_data_tvalid => m_axis_fir_stage1_tvalid,
+    s_axis_data_tready => s_axis_fir_stage2_tready,
+    s_axis_data_tdata => m_axis_fir_stage1_tdata,
+    m_axis_data_tvalid => m_axis_fir_stage2_tvalid,
+    m_axis_data_tdata(127 downto 64) => s_data_raw_q,
+    m_axis_data_tdata(63 downto 0) => s_data_raw_i
+  );
+  
+  s_data_i <= STD_LOGIC_VECTOR(shift_right(signed(s_data_raw_i),40));
+  s_data_q <= STD_LOGIC_VECTOR(shift_right(signed(s_data_raw_q),40));
+  m_axis_tdata <= ((s_data_q(15 downto 0)) & (s_data_i(15 downto 0)));
+  m_axis_tvalid <= m_axis_fir_stage2_tvalid;
 
 	-- User logic ends
 

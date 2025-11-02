@@ -2,10 +2,10 @@
   "schema": "xilinx.com:schema:json_instance:1.0",
   "ip_inst": {
     "xci_name": "dds_compiler_0",
-    "cell_name": "full_radio_v1_0_S00_AXI_inst/your_instance_name",
+    "cell_name": "full_radio_v1_0_S00_AXI_inst/fake_adc",
     "component_reference": "xilinx.com:ip:dds_compiler:6.0",
     "ip_revision": "26",
-    "gen_directory": "../../../../../../../../users/wenstds1/class/dellater/vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/dds_compiler_0",
+    "gen_directory": "../../../../../../../../../users/bjose/soc-labs/lab10/radio_periph_lab/vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/dds_compiler_0",
     "parameters": {
       "component_parameters": {
         "Component_Name": [ { "value": "dds_compiler_0", "resolve_type": "user", "usage": "all" } ],
@@ -180,7 +180,7 @@
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
         "IPREVISION": [ { "value": "26" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "../../../../../../../../users/wenstds1/class/dellater/vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/dds_compiler_0" } ],
+        "OUTPUTDIR": [ { "value": "../../../../../../../../../users/bjose/soc-labs/lab10/radio_periph_lab/vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/dds_compiler_0" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
         "SWVERSION": [ { "value": "2024.2" } ],
