@@ -122,8 +122,9 @@ architecture arch_imp of full_radio_v1_0_S00_AXI is
 	
 	--User signals
 	signal aresetn : std_logic;
+	signal avalid : std_logic;
 	
-	signal m_axis_fake_adc_tdata : std_logic_vector(31 downto 0);
+	signal m_axis_fake_adc_tdata : std_logic_vector(15 downto 0);
 	signal m_axis_fake_adc_tvalid : std_logic;
 	
 	signal m_axis_dds_tuner_tdata : std_logic_vector(31 downto 0);
@@ -154,7 +155,7 @@ COMPONENT dds_compiler_0
     s_axis_phase_tvalid : IN STD_LOGIC;
     s_axis_phase_tdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
     m_axis_data_tvalid : OUT STD_LOGIC;
-    m_axis_data_tdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+    m_axis_data_tdata : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
   );
     END COMPONENT;
 
@@ -308,7 +309,7 @@ begin
 	      slv_reg2 <= (others => '0');
 	      slv_reg3 <= (others => '0');
 	    else
-	      slv_reg3 <= std_logic_vector(unsigned(slv_reg3) + 1); --increment slv_reg2 for every rising edge 
+	      slv_reg3 <= std_logic_vector(unsigned(slv_reg3) + 1); --increment slv_reg3 for every rising edge 
 	      loc_addr := axi_awaddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
 	      if (slv_reg_wren = '1') then
 	        case loc_addr is
@@ -465,7 +466,8 @@ begin
 	  end if;
 	end process;
 
-    aresetn <= not slv_reg2(0);  
+    aresetn <= not slv_reg2(0);
+    avalid <= slv_reg2(1);  
 	-- Add user logic here
 
 fake_adc : dds_compiler_0
@@ -492,7 +494,8 @@ fake_adc : dds_compiler_0
   PORT MAP (
     aclk => s_axi_aclk,
     s_axis_a_tvalid => m_axis_fake_adc_tvalid,
-    s_axis_a_tdata => m_axis_fake_adc_tdata,
+    s_axis_a_tdata(31 downto 16) => (others=>'0'),
+    s_axis_a_tdata(15 downto 0) => m_axis_fake_adc_tdata,
     s_axis_b_tvalid => m_axis_dds_tuner_tvalid,
     s_axis_b_tdata => m_axis_dds_tuner_tdata,
     m_axis_dout_tvalid => m_axis_cmpy_tvalid,
@@ -525,7 +528,7 @@ fir_stage_1 : fir_compiler_0
   s_data_i <= STD_LOGIC_VECTOR(shift_right(signed(s_data_raw_i),40));
   s_data_q <= STD_LOGIC_VECTOR(shift_right(signed(s_data_raw_q),40));
   m_axis_tdata <= ((s_data_q(15 downto 0)) & (s_data_i(15 downto 0)));
-  m_axis_tvalid <= m_axis_fir_stage2_tvalid;
+  m_axis_tvalid <= m_axis_fir_stage2_tvalid when (avalid = '1') else '0';
 
 	-- User logic ends
 

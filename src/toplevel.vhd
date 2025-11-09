@@ -41,7 +41,8 @@ entity design_1_wrapper is
     bclk : out STD_LOGIC;
     lrck : out STD_LOGIC;
     mclk : out STD_LOGIC;
-    sdata : out STD_LOGIC
+    sdata : out STD_LOGIC;
+    tlast : in STD_LOGIC
   );
 end design_1_wrapper;
 
@@ -53,6 +54,7 @@ architecture STRUCTURE of design_1_wrapper is
     mclk : out STD_LOGIC;
     sdata : out STD_LOGIC;
     clk125 : in STD_LOGIC;
+    tlast : in STD_LOGIC;
     IIC_0_scl_i : in STD_LOGIC;
     IIC_0_scl_o : out STD_LOGIC;
     IIC_0_scl_t : out STD_LOGIC;
@@ -144,7 +146,8 @@ design_1_i: component design_1
       lrck => lrck,
       mclk => mclk,
       sdata => sdata,
-      clk125=>clk125
+      clk125=>clk125,
+      tlast => '1'
     );
     
 ac_muten <= '1';    

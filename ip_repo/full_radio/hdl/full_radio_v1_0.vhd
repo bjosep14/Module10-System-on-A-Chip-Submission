@@ -18,6 +18,7 @@ entity full_radio_v1_0 is
 		-- Users to add ports here
         m_axis_tvalid : out std_logic;
         m_axis_tdata : out std_logic_vector(31 downto 0);
+        m_axis_tready : in std_logic;
 		-- User ports ends
 		-- Do not modify the ports beyond this line
 

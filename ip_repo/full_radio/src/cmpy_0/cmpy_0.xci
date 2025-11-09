@@ -5,7 +5,7 @@
     "cell_name": "full_radio_v1_0_S00_AXI_inst/complex_mult",
     "component_reference": "xilinx.com:ip:cmpy:6.0",
     "ip_revision": "25",
-    "gen_directory": "../../../../../../../../../users/bjose/soc-labs/lab10/radio_periph_lab/vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/cmpy_0",
+    "gen_directory": "../../../../../../../../../users/bjose/soc-labs/lab11/module10-system-on-a-chip-submission/vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/cmpy_0",
     "parameters": {
       "component_parameters": {
         "Component_Name": [ { "value": "cmpy_0", "resolve_type": "user", "usage": "all" } ],
@@ -85,7 +85,7 @@
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
         "IPREVISION": [ { "value": "25" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "../../../../../../../../../users/bjose/soc-labs/lab10/radio_periph_lab/vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/cmpy_0" } ],
+        "OUTPUTDIR": [ { "value": "../../../../../../../../../users/bjose/soc-labs/lab11/module10-system-on-a-chip-submission/vivado/radio_periph_lab.tmp/full_radio_v1_0_project/full_radio_v1_0_project.gen/sources_1/ip/cmpy_0" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
         "SWVERSION": [ { "value": "2024.2" } ],
