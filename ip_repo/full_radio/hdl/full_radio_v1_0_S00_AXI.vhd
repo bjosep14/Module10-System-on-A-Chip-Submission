@@ -123,7 +123,7 @@ architecture arch_imp of full_radio_v1_0_S00_AXI is
 	--User signals
 	signal aresetn : std_logic;
 	
-	signal m_axis_fake_adc_tdata : std_logic_vector(31 downto 0);
+	signal m_axis_fake_adc_tdata : std_logic_vector(15 downto 0);
 	signal m_axis_fake_adc_tvalid : std_logic;
 	
 	signal m_axis_dds_tuner_tdata : std_logic_vector(31 downto 0);
@@ -154,7 +154,7 @@ COMPONENT dds_compiler_0
     s_axis_phase_tvalid : IN STD_LOGIC;
     s_axis_phase_tdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
     m_axis_data_tvalid : OUT STD_LOGIC;
-    m_axis_data_tdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+    m_axis_data_tdata : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
   );
     END COMPONENT;
 
@@ -492,7 +492,8 @@ fake_adc : dds_compiler_0
   PORT MAP (
     aclk => s_axi_aclk,
     s_axis_a_tvalid => m_axis_fake_adc_tvalid,
-    s_axis_a_tdata => m_axis_fake_adc_tdata,
+    s_axis_a_tdata(31 downto 16) => (others=>'0'),
+    s_axis_a_tdata(15 downto 0) => m_axis_fake_adc_tdata,
     s_axis_b_tvalid => m_axis_dds_tuner_tvalid,
     s_axis_b_tdata => m_axis_dds_tuner_tdata,
     m_axis_dout_tvalid => m_axis_cmpy_tvalid,
